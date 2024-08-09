@@ -37,11 +37,11 @@ namespace fluentArgs{
             string getDelim();
             void executeOperation();
 
-        // protected:
-            // void setName(string name);
-            // void setDouble_dash(string name);
-            // void setValue(string numValues);
-            // void setOperation(function <void()> operation);
+        protected:
+            void setName(string name);
+            void setDouble_dash(string name);
+            void setValue(string numValues);
+            void setOperation(function <void()> operation);
         };
         
         
@@ -49,9 +49,11 @@ namespace fluentArgs{
         
         private:
             string name_;
-            string alias_;
+            string alias_ = "";
             int numValues_ = 0;
             function<void()> operation_;
+            void reset();
+
 
             string delim_ = " ";
 
@@ -59,7 +61,7 @@ namespace fluentArgs{
             FlagBuilder& setName(const string name);
             FlagBuilder& setAlias(const string alias);
             FlagBuilder& setOperation(function<void()> operation);
-            FlagBuilder& setNumValues(const int numValues);
+            FlagBuilder& setNumValues(int numValues);
             FlagBuilder& withDelim(const string delim);
 
             Flag build();

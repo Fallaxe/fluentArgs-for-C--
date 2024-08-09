@@ -28,16 +28,17 @@ void fluentArgs::Flag::executeOperation()
     this->operation_();
 }
 
-//FlagBuilder implementation
-FlagBuilder &fluentArgs::FlagBuilder::setName(const string dash)
+
+// FlagBuilder implementation
+FlagBuilder &fluentArgs::FlagBuilder::setName(const string name)
 {
-    name_ = dash;
+    name_ = name;
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setAlias(const string doubleDash)
+FlagBuilder &fluentArgs::FlagBuilder::setAlias(const string alias)
 {
-    alias_ = doubleDash;
+    alias_ = alias;
     return *this;
 }
 
@@ -47,9 +48,9 @@ FlagBuilder &fluentArgs::FlagBuilder::setOperation(function<void()> operation)
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setNumValues(const int value)
+FlagBuilder &fluentArgs::FlagBuilder::setNumValues(int numValues)
 {
-    numValues_ = value;
+    numValues_ = numValues;
     return *this;
 }
 
@@ -57,6 +58,16 @@ FlagBuilder &fluentArgs::FlagBuilder::withDelim(const string delim)
 {
     delim_ = delim;
     return *this;
+}
+
+
+void fluentArgs::FlagBuilder::reset()
+{
+    this->alias_ = "";
+    this->name_ = "";
+    this->operation_ = std::function<void()>();
+    this->delim_ = " ";
+    this->numValues_ = 0;
 }
 
 Flag fluentArgs::FlagBuilder::build()
@@ -67,12 +78,16 @@ Flag fluentArgs::FlagBuilder::build()
     // if(alias_.empty())
     //     throw runtime_error("alias cannot be empty");
     
-    //value can be empty 'cause sometimes you need options without a value;
+    //numValues can be empty 'cause sometimes you need options without a value;
 
     if(!operation_)
         throw runtime_error("operation cannot be unsetted");
+    
+    Flag flag = Flag(name_,alias_,numValues_,operation_,delim_);
 
-    return Flag(name_,alias_,numValues_,operation_,delim_);
+    reset();
+
+    return flag;
 }
 
 //argParserBuilder implementation
@@ -118,7 +133,7 @@ void fluentArgs::ArgParser::checkArguments()
 {
     for(std::vector<Flag>::iterator it = this->flags_.begin(); it != this->flags_.end(); ++it){
         if(compare(*it)) it->executeOperation(); //execute the operation!
-        else if(terminateOnFailure_) return;
+        // else if(terminateOnFailure_) return; rompe tutto se non esegue primo flag in ordine cosa errata!
 
         it += it->getNumValues(); // mando avanti di numvalues posizioni l'iteratore
     }
@@ -128,7 +143,13 @@ void fluentArgs::ArgParser::checkArguments()
 bool fluentArgs::ArgParser::compare(Flag flag)
 {
     for(std::vector<Argument>::iterator it = this->arguments_.begin(); it != this->arguments_.end(); ++it){
-        if((flag.getName() == it->getArg()) || (flag.getAlias() == it->getArg())){
+        
+        bool check = (flag.getAlias() != ""); //c'è alias?
+        //se c'è alias --> controlla nome ed alias SENNO' solo nome
+        check = (check ? flag.getName() == it->getArg() || flag.getAlias() == it->getArg() : flag.getName() == it->getArg());
+        
+        //(flag.getName() == it->getArg()) || ( check && flag.getAlias() == it->getArg())
+        if(check){
             int pos = 0;
             for(int i = 0; i< flag.getNumValues(); i++){
                 if(flag.getDelim() == " "){
