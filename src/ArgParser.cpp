@@ -2,7 +2,7 @@
 using namespace fluentArgs;
 using namespace std;
 
-//Flag implementation
+// Flag implementation
 string fluentArgs::Flag::getName()
 {
     return this->name_;
@@ -23,11 +23,14 @@ string fluentArgs::Flag::getDelim()
     return this->delim_;
 }
 
-void fluentArgs::Flag::executeOperation()
+// void fluentArgs::Flag::executeOperation()
+// {
+//     this->operation_();
+// }
+void fluentArgs::Flag::executeOperation(std::vector<string> subParam)
 {
-    this->operation_();
+    this->operation_(subParam);
 }
-
 
 // FlagBuilder implementation
 FlagBuilder &fluentArgs::FlagBuilder::setName(const string name)
@@ -42,7 +45,7 @@ FlagBuilder &fluentArgs::FlagBuilder::setAlias(const string alias)
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setOperation(function<void()> operation)
+FlagBuilder &fluentArgs::FlagBuilder::setOperation(function<void(std::vector<string>)> operation)
 {
     operation_ = operation;
     return *this;
@@ -65,7 +68,7 @@ void fluentArgs::FlagBuilder::reset()
 {
     this->alias_ = "";
     this->name_ = "";
-    this->operation_ = std::function<void()>();
+    this->operation_ = std::function<void(std::vector<string>)>();
     this->delim_ = " ";
     this->numValues_ = 0;
 }
@@ -132,16 +135,19 @@ ArgParser fluentArgs::ArgParserBuilder::build()
 void fluentArgs::ArgParser::checkArguments()
 {
     for(std::vector<Flag>::iterator it = this->flags_.begin(); it != this->flags_.end(); ++it){
-        if(compare(*it)) it->executeOperation(); //execute the operation!
+        // if(compare(*it)) it->executeOperation(); //execute the operation!
         // else if(terminateOnFailure_) return; rompe tutto se non esegue primo flag in ordine cosa errata!
 
-        it += it->getNumValues(); // mando avanti di numvalues posizioni l'iteratore
+        if(compare(*it) && !terminateOnFailure_) return;
+        // it += it->getNumValues() -1 ; // mando avanti di numvalues posizioni l'iteratore
     }
 }
 
 
 bool fluentArgs::ArgParser::compare(Flag flag)
 {
+    std::vector<string> subParam;
+
     for(std::vector<Argument>::iterator it = this->arguments_.begin(); it != this->arguments_.end(); ++it){
         
         bool check = (flag.getAlias() != ""); //c'è alias?
@@ -155,15 +161,18 @@ bool fluentArgs::ArgParser::compare(Flag flag)
                 if(flag.getDelim() == " "){
                     if(i > arguments_.size() || flag.getNumValues() > arguments_.size()) return false;
                     it++;
+                    subParam.emplace_back(it->getArg());///-<continua qua ? cambiamo da string a Argument nel prototipo di funzione?
                 }
                 else{
                     std::string token = it->getArg().substr(pos, it->getArg().find(flag.getDelim()));
+                    subParam.emplace_back(token);
                     pos = token.length()+flag.getDelim().length();
                     if(pos > it->getArg().length()) // se sono passati meno parametri...?
                         return false;
                 }
             }
-            return true;
+            flag.executeOperation(subParam);
+            return true;  //non funziona più 'e' nellesempio
         }
     }
 

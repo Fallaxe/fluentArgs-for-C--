@@ -18,16 +18,17 @@ namespace fluentArgs{
     class Flag{
         
         friend class FlagBuilder;
+        friend class ArgParser;
 
         private:
             string name_;
             string alias_;
             int numValues_;
-            function<void()> operation_;
+            function<void(std::vector<string>)> operation_;
 
             string delim_;
 
-            Flag(string name, string alias, int numValues, function<void()> operation, string delim)
+            Flag(string name, string alias, int numValues, function<void(std::vector<string>)> operation, string delim)
             :name_(name),alias_(alias),operation_(operation),numValues_(numValues),delim_(delim){}; //init
 
         public:
@@ -35,13 +36,14 @@ namespace fluentArgs{
             string getAlias();
             int getNumValues();
             string getDelim();
-            void executeOperation();
 
         protected:
             void setName(string name);
             void setDouble_dash(string name);
             void setValue(string numValues);
-            void setOperation(function <void()> operation);
+            void setOperation(function <void(std::vector<string>)> operation);
+            void executeOperation(std::vector<string> subParam);
+
         };
         
         
@@ -51,7 +53,7 @@ namespace fluentArgs{
             string name_;
             string alias_ = "";
             int numValues_ = 0;
-            function<void()> operation_;
+            function<void(std::vector<string>)> operation_;
             void reset();
 
 
@@ -60,7 +62,7 @@ namespace fluentArgs{
         public:
             FlagBuilder& setName(const string name);
             FlagBuilder& setAlias(const string alias);
-            FlagBuilder& setOperation(function<void()> operation);
+            FlagBuilder& setOperation(function<void(std::vector<string>)> operation);
             FlagBuilder& setNumValues(int numValues);
             FlagBuilder& withDelim(const string delim);
 

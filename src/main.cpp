@@ -4,15 +4,15 @@
 using namespace std;
 using namespace fluentArgs;
 
-void myFun(){
+void myFun(std::vector<string> vec){
     cout<<"ciao"<<endl;
 }
-void exempleFun(){
+void exempleFun(std::vector<string> vec){
     cout<<"exemple"<<endl;
 }
 
-void helloWorld(){
-    cout<<"Hello world!"<<endl;
+void helloWorld(std::vector<string> vec){
+    cout<<"Hello world!"+vec.at(1)<<endl;
 }
 
 int main(int argc, char const *argv[])
@@ -35,6 +35,7 @@ int main(int argc, char const *argv[])
     Flag flag2 = flagbuilder
                     .setName("-hw")
                     .setAlias("--helloworld")
+                    .setNumValues(2)
                     .setOperation(helloWorld)
                     .build();
     Flag flagWithoutAlias = flagbuilder
