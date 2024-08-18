@@ -23,6 +23,11 @@ string fluentArgs::Flag::getDelim()
     return this->delim_;
 }
 
+string fluentArgs::Flag::getDescription()
+{
+    return this->description_;
+}
+
 // void fluentArgs::Flag::executeOperation()
 // {
 //     this->operation_();
@@ -63,6 +68,11 @@ FlagBuilder &fluentArgs::FlagBuilder::withDelim(const string delim)
     return *this;
 }
 
+FlagBuilder &fluentArgs::FlagBuilder::withDescription(const string description)
+{
+    description_ = description;
+    return *this;
+}
 
 void fluentArgs::FlagBuilder::reset()
 {
@@ -70,6 +80,7 @@ void fluentArgs::FlagBuilder::reset()
     this->name_ = "";
     this->operation_ = std::function<void(std::vector<string>)>();
     this->delim_ = " ";
+    this->description_ = " ";
     this->numValues_ = 0;
 }
 
@@ -86,7 +97,7 @@ Flag fluentArgs::FlagBuilder::build()
     if(!operation_)
         throw runtime_error("operation cannot be unsetted");
     
-    Flag flag = Flag(name_,alias_,numValues_,operation_,delim_);
+    Flag flag = Flag(name_,alias_,numValues_,operation_,delim_,description_);
 
     reset();
 
@@ -173,6 +184,15 @@ void fluentArgs::ArgParser::checkArguments()
     }
 }
 
+string fluentArgs::ArgParser::resume()
+{
+    string resumeStr;
+    for(Flag flag : flags_){
+        resumeStr.append(flag.getName()+"\talias: "+flag.getAlias()+"\n\tdecription: "+flag.getDescription()+"\n");
+    }
+    
+    return resumeStr;
+}
 
 // bool fluentArgs::ArgParser::compare(Flag flag)
 // {

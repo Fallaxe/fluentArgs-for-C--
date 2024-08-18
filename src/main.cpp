@@ -29,6 +29,7 @@ int main(int argc, char const *argv[])
     Flag flag1 = flagbuilder
                     .setName("-a")
                     .setAlias("--arg")
+                    .withDescription("first exemple of a flag in a program")
                     .setOperation(myFun)
                     .build();
     
@@ -54,6 +55,7 @@ int main(int argc, char const *argv[])
                             .addFlag(flagWithoutAlias)
                             .build();
 
+    cout<<argparser.resume()<<endl;
     argparser.checkArguments();
 
     return 0;

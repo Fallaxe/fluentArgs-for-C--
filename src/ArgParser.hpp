@@ -25,17 +25,18 @@ namespace fluentArgs{
             string alias_;
             int numValues_;
             function<void(std::vector<string>)> operation_;
-
             string delim_;
+            string description_;
 
-            Flag(string name, string alias, int numValues, function<void(std::vector<string>)> operation, string delim)
-            :name_(name),alias_(alias),operation_(operation),numValues_(numValues),delim_(delim){}; //init
+            Flag(string name, string alias, int numValues, function<void(std::vector<string>)> operation, string delim,string description)
+            :name_(name),alias_(alias),operation_(operation),numValues_(numValues),delim_(delim),description_(description){}; //init
 
         public:
             string getName();
             string getAlias();
             int getNumValues();
             string getDelim();
+            string getDescription();
 
         protected:
             void setName(string name);
@@ -54,10 +55,11 @@ namespace fluentArgs{
             string alias_ = "";
             int numValues_ = 0;
             function<void(std::vector<string>)> operation_;
+            string delim_ = " ";
+            string description_=" ";
+
             void reset();
 
-
-            string delim_ = " ";
 
         public:
             FlagBuilder& setName(const string name);
@@ -65,6 +67,7 @@ namespace fluentArgs{
             FlagBuilder& setOperation(function<void(std::vector<string>)> operation);
             FlagBuilder& setNumValues(int numValues);
             FlagBuilder& withDelim(const string delim);
+            FlagBuilder& withDescription(const string description);
 
             Flag build();
     };
@@ -75,6 +78,7 @@ namespace fluentArgs{
 
     public:
         void checkArguments();
+        string resume();
         //bool checkOnly(//flags);
 
     private:
