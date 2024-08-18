@@ -80,6 +80,7 @@ namespace fluentArgs{
     private:
         ArgParser(vector<Flag> flags,vector<Argument> arguments, bool terminateOnFailure) : flags_(flags),arguments_(arguments),terminateOnFailure_(terminateOnFailure){};
         bool compare(Flag flag);
+        bool compare(Flag flag, Argument arg);
         vector<Flag> flags_;
         vector<Argument> arguments_;
         bool terminateOnFailure_ = true;

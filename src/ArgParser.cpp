@@ -134,49 +134,86 @@ ArgParser fluentArgs::ArgParserBuilder::build()
 
 void fluentArgs::ArgParser::checkArguments()
 {
-    for(std::vector<Flag>::iterator it = this->flags_.begin(); it != this->flags_.end(); ++it){
-        // if(compare(*it)) it->executeOperation(); //execute the operation!
-        // else if(terminateOnFailure_) return; rompe tutto se non esegue primo flag in ordine cosa errata!
+    // for(std::vector<Flag>::iterator it = this->flags_.begin(); it != this->flags_.end(); ++it){
+    //     // if(compare(*it)) it->executeOperation(); //execute the operation!
+    //     // else if(terminateOnFailure_) return; rompe tutto se non esegue primo flag in ordine cosa errata!
 
-        if(compare(*it) && !terminateOnFailure_) return;
-        // it += it->getNumValues() -1 ; // mando avanti di numvalues posizioni l'iteratore
+    //     if(compare(*it) && !terminateOnFailure_) return;
+    //     // it += it->getNumValues() -1 ; // mando avanti di numvalues posizioni l'iteratore
+    // }
+
+    for(std::vector<Argument>::iterator itArg = this->arguments_.begin(); itArg != this->arguments_.end(); ++itArg){
+        for(std::vector<Flag>::iterator itFlag = this->flags_.begin(); itFlag != this->flags_.end(); ++itFlag){
+            if(compare(*itFlag,*itArg)){
+                vector<string> subArg;
+                int pos =0;
+                bool check = true;
+                if(itFlag->getDelim() == " " && itFlag->getNumValues() > 0){
+                    for(int i = 0; i < itFlag->getNumValues(); i++){
+                        if(i > arguments_.size() || itFlag->getNumValues() > arguments_.size()) return;
+                        itArg++;
+                        subArg.emplace_back(itArg->getArg());
+                    }
+                    
+                }
+                else if(itFlag->getNumValues() > 0){
+                        std::string token = itArg->getArg().substr(pos, itArg->getArg().find(itFlag->getDelim()));
+                        subArg.emplace_back(token);
+                        pos = token.length()+itFlag->getDelim().length();
+                        if(pos > itArg->getArg().length()) // se sono passati meno parametri...?
+                            return;
+                        itArg++;
+                    }
+                itFlag->executeOperation(subArg);
+            }
+            if(std::distance(arguments_.begin(),itArg) + itFlag->getNumValues() >= arguments_.size())
+                return;//?
+            itArg += itFlag->getNumValues();
+        }
     }
 }
 
 
-bool fluentArgs::ArgParser::compare(Flag flag)
-{
-    std::vector<string> subParam;
+// bool fluentArgs::ArgParser::compare(Flag flag)
+// {
+//     std::vector<string> subParam;
 
-    for(std::vector<Argument>::iterator it = this->arguments_.begin(); it != this->arguments_.end(); ++it){
+//     for(std::vector<Argument>::iterator it = this->arguments_.begin(); it != this->arguments_.end(); ++it){
         
-        bool check = (flag.getAlias() != ""); //c'è alias?
-        //se c'è alias --> controlla nome ed alias SENNO' solo nome
-        check = (check ? flag.getName() == it->getArg() || flag.getAlias() == it->getArg() : flag.getName() == it->getArg());
+//         bool check = (flag.getAlias() != ""); //c'è alias?
+//         //se c'è alias --> controlla nome ed alias SENNO' solo nome
+//         check = (check ? flag.getName() == it->getArg() || flag.getAlias() == it->getArg() : flag.getName() == it->getArg());
         
-        //(flag.getName() == it->getArg()) || ( check && flag.getAlias() == it->getArg())
-        if(check){
-            int pos = 0;
-            for(int i = 0; i< flag.getNumValues(); i++){
-                if(flag.getDelim() == " "){
-                    if(i > arguments_.size() || flag.getNumValues() > arguments_.size()) return false;
-                    it++;
-                    subParam.emplace_back(it->getArg());///-<continua qua ? cambiamo da string a Argument nel prototipo di funzione?
-                }
-                else{
-                    std::string token = it->getArg().substr(pos, it->getArg().find(flag.getDelim()));
-                    subParam.emplace_back(token);
-                    pos = token.length()+flag.getDelim().length();
-                    if(pos > it->getArg().length()) // se sono passati meno parametri...?
-                        return false;
-                }
-            }
-            flag.executeOperation(subParam);
-            return true;  //non funziona più 'e' nellesempio
-        }
-    }
+//         //(flag.getName() == it->getArg()) || ( check && flag.getAlias() == it->getArg())
+//         if(check){
+//             int pos = 0;
+//             for(int i = 0; i< flag.getNumValues(); i++){
+//                 if(flag.getDelim() == " "){
+//                     if(i > arguments_.size() || flag.getNumValues() > arguments_.size()) return false;
+//                     it++;
+//                     subParam.emplace_back(it->getArg());///-<continua qua ? cambiamo da string a Argument nel prototipo di funzione?
+//                 }
+//                 else{
+//                     std::string token = it->getArg().substr(pos, it->getArg().find(flag.getDelim()));
+//                     subParam.emplace_back(token);
+//                     pos = token.length()+flag.getDelim().length();
+//                     if(pos > it->getArg().length()) // se sono passati meno parametri...?
+//                         return false;
+//                 }
+//             }
+//             flag.executeOperation(subParam);
+//             return true;  //non funziona più 'e' nellesempio
+//         }
+//     }
 
-    return false;
+//     return false;
+// }
+
+bool fluentArgs::ArgParser::compare(Flag flag, Argument arg)
+{   
+    bool check = (flag.getAlias() != " ");
+    check = (check ? flag.getName() == arg.getArg() || flag.getAlias() == arg.getArg() : flag.getName() == arg.getArg());
+    return (check);
 }
 
 string fluentArgs::Argument::getArg()

@@ -12,7 +12,7 @@ void exempleFun(std::vector<string> vec){
 }
 
 void helloWorld(std::vector<string> vec){
-    cout<<"Hello world!"+vec.at(1)<<endl;
+    cout<<"Hello world!"+vec.at(0)<<endl;
 }
 
 int main(int argc, char const *argv[])
@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
     Flag flag2 = flagbuilder
                     .setName("-hw")
                     .setAlias("--helloworld")
-                    .setNumValues(2)
+                    .setNumValues(1)
                     .setOperation(helloWorld)
                     .build();
     Flag flagWithoutAlias = flagbuilder
