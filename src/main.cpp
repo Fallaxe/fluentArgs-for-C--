@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
     Flag flag2 = flagbuilder
                     .setName("-hw")
                     .setAlias("--helloworld")
-                    .setNumValues(1)
+                    .setNumValues(2)
                     .setOperation(helloWorld)
                     .build();
     Flag flagWithoutAlias = flagbuilder

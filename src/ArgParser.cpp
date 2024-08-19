@@ -158,28 +158,36 @@ void fluentArgs::ArgParser::checkArguments()
             if(compare(*itFlag,*itArg)){
                 vector<string> subArg;
                 int pos =0;
-                bool check = true;
-                if(itFlag->getDelim() == " " && itFlag->getNumValues() > 0){
-                    for(int i = 0; i < itFlag->getNumValues(); i++){
-                        if(i > arguments_.size() || itFlag->getNumValues() > arguments_.size()) return;
-                        itArg++;
-                        subArg.emplace_back(itArg->getArg());
+
+                if(std::distance(arguments_.begin(),itArg) + itFlag->getNumValues() > arguments_.size()-1)
+                    return;// posso contenere gli ipotetici argomenti o vado in overflow?
+                    
+                if(itFlag->getNumValues() > 0){ //ci sono argomenti?
+
+                    if(itFlag->getDelim() == " "){ // si e hanno " " come delimitatore
+                        for(int i = 0; i < itFlag->getNumValues(); i++){
+                            if(i > arguments_.size() || itFlag->getNumValues() > arguments_.size()) return;
+                    
+                            itArg++; //bug: se metto un comando che riceverebbe un valore ed è l'ultimo va in fault
+                            subArg.emplace_back(itArg->getArg());
+                        }
                     }
+                    else{ //si e hanno un delimitatore custom NOT YET IMPLEMENTED
+                            std::string token = itArg->getArg().substr(pos, itArg->getArg().find(itFlag->getDelim()));
+                            subArg.emplace_back(token);
+                            pos = token.length()+itFlag->getDelim().length();
+                            if(pos > itArg->getArg().length()) // se sono passati meno parametri...?
+                                return;
+                            itArg++;
+                        }
                     
                 }
-                else if(itFlag->getNumValues() > 0){
-                        std::string token = itArg->getArg().substr(pos, itArg->getArg().find(itFlag->getDelim()));
-                        subArg.emplace_back(token);
-                        pos = token.length()+itFlag->getDelim().length();
-                        if(pos > itArg->getArg().length()) // se sono passati meno parametri...?
-                            return;
-                        itArg++;
-                    }
+                
                 itFlag->executeOperation(subArg);
+                // itArg += itFlag->getNumValues(); fa crashare
+
             }
-            if(std::distance(arguments_.begin(),itArg) + itFlag->getNumValues() >= arguments_.size())
-                return;//?
-            itArg += itFlag->getNumValues();
+            
         }
     }
 }
