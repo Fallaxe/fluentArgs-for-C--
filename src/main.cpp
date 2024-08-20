@@ -43,7 +43,7 @@ int main(int argc, char const *argv[])
                     .withOperation(helloWorld)
                     .build();
 
-    Flag flagWithoutAlias = fluentArgs::createFlag()
+    Flag flagWithoutAlias = Flag::create()
                                 .withName("e")
                                 .withOperation(exempleFun)
                                 .build();
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
     
     ArgParser argparser = ArgParser::create()
                             .withFlag(flag1)
-                            .withFlag(flag2)
+                            .withFlag(flag2,flagWithoutAlias)
                             .withArgs(argc,argv)
                             .build();
 

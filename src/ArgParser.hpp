@@ -104,6 +104,8 @@ namespace fluentArgs{
     friend class ArgParser;
     public:
         ArgParserBuilder& withFlag(Flag flag);
+        template<typename... Flags>
+        ArgParserBuilder& withFlag(Flag flag, Flags...otherFlag);
         ArgParserBuilder& withArgs(int argc, char const *argv[]);
         ArgParserBuilder& withoutTerminateOnFailure();
         ArgParser build();
@@ -122,6 +124,18 @@ namespace fluentArgs{
 
     static ArgParserBuilder createArgParser(){
         return ArgParser::create();
+    }
+
+    template <typename... Flags>
+    inline ArgParserBuilder &ArgParserBuilder::withFlag(Flag flag, Flags... otherFlag)
+    {
+        this->withFlag(flag);
+        
+        if constexpr (sizeof...(otherFlag) > 0) {
+            this->withFlag(otherFlag...); // Chiamata ricorsiva
+        }
+
+        return *this;
     }
 
 }
