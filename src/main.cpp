@@ -23,36 +23,38 @@ int main(int argc, char const *argv[])
             (aggiungere delimitatore al flag per i parametri? oppure si usa sempre ' ')
         -rendere static i builder
         -aggiustare nel caso ci siano argomenti nel mezzo che sporcano "./main -hw e poop -a" esegue uguale ma non deve se failetc dice di no
-        -modificare operation in una funzione void con parametri a vettore/... string void operation(string.../vectorstring)
+        -DONE: modificare operation in una funzione void con parametri a vettore/... string void operation(string.../vectorstring)
+        -cambiare tutti i metodi di Flagbuilder in withSMTG() etc per avere un interfaccia più fluida
+        -toglire reset?
     */
-    FlagBuilder flagbuilder;
-    Flag flag1 = flagbuilder
-                    .setName("-a")
-                    .setAlias("--arg")
+
+   
+    Flag flag1 = Flag::create()
+                    .withName("-a")
+                    .withAlias("--arg")
                     .withDescription("first exemple of a flag in a program")
-                    .setOperation(myFun)
+                    .withOperation(myFun)
                     .build();
     
-    Flag flag2 = flagbuilder
-                    .setName("-hw")
-                    .setAlias("--helloworld")
-                    .setNumValues(2)
-                    .setOperation(helloWorld)
+    Flag flag2 = Flag::create()
+                    .withName("-hw")
+                    .withAlias("--helloworld")
+                    .withNumberOfValues(2)
+                    .withOperation(helloWorld)
                     .build();
-    Flag flagWithoutAlias = flagbuilder
-                                .setName("e")
-                                .setOperation(exempleFun)
+
+    Flag flagWithoutAlias = fluentArgs::createFlag()
+                                .withName("e")
+                                .withOperation(exempleFun)
                                 .build();
 
     // cout<<flagWithoutAlias.getAlias()<<endl;
     //i valori non sono per ora passati all operation, il che rende un po inutile la cosa TODO!
     
-    ArgParserBuilder argparserbuilder;
-    ArgParser argparser = argparserbuilder
-                            .addFlag(flag1)
-                            .addFlag(flag2)
-                            .addArgs(argc,argv)
-                            .addFlag(flagWithoutAlias)
+    ArgParser argparser = ArgParser::create()
+                            .withFlag(flag1)
+                            .withFlag(flag2)
+                            .withArgs(argc,argv)
                             .build();
 
     cout<<argparser.resume()<<endl;

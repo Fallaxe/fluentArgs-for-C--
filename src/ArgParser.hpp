@@ -5,7 +5,13 @@
 using namespace std;
 
 namespace fluentArgs{
-    
+
+    //forward declaration
+    class Flag;
+    class FlagBuilder;
+    class ArgParser;
+    class ArgParserBuilder;
+
     class Argument{
         friend class ArgParserBuilder;
         private:
@@ -15,6 +21,31 @@ namespace fluentArgs{
             string getArg();
     };
     
+    class FlagBuilder{
+        
+        friend class Flag;
+        private:
+            string name_;
+            string alias_ = "";
+            int numValues_ = 0;
+            function<void(std::vector<string>)> operation_;
+            string delim_ = " ";
+            string description_=" ";
+            FlagBuilder() = default;
+
+            void reset();
+
+
+        public:
+            FlagBuilder& withName(const string name);
+            FlagBuilder& withAlias(const string alias);
+            FlagBuilder& withOperation(function<void(std::vector<string>)> operation);
+            FlagBuilder& withNumberOfValues(int numValues);
+            FlagBuilder& withDelim(const string delim);
+            FlagBuilder& withDescription(const string description);
+
+            Flag build();
+    };
     class Flag{
         
         friend class FlagBuilder;
@@ -37,48 +68,25 @@ namespace fluentArgs{
             int getNumValues();
             string getDelim();
             string getDescription();
+            static FlagBuilder create();
 
         protected:
-            void setName(string name);
+            void withName(string name);
             void setDouble_dash(string name);
             void setValue(string numValues);
-            void setOperation(function <void(std::vector<string>)> operation);
+            void withOperation(function <void(std::vector<string>)> operation);
             void executeOperation(std::vector<string> subParam);
 
+
         };
-        
-        
-    class FlagBuilder{
-        
-        private:
-            string name_;
-            string alias_ = "";
-            int numValues_ = 0;
-            function<void(std::vector<string>)> operation_;
-            string delim_ = " ";
-            string description_=" ";
-
-            void reset();
-
-
-        public:
-            FlagBuilder& setName(const string name);
-            FlagBuilder& setAlias(const string alias);
-            FlagBuilder& setOperation(function<void(std::vector<string>)> operation);
-            FlagBuilder& setNumValues(int numValues);
-            FlagBuilder& withDelim(const string delim);
-            FlagBuilder& withDescription(const string description);
-
-            Flag build();
-    };
     
-
     class ArgParser{
         friend class ArgParserBuilder;
 
     public:
         void checkArguments();
         string resume();
+        static ArgParserBuilder create();
         //bool checkOnly(//flags);
 
     private:
@@ -93,9 +101,10 @@ namespace fluentArgs{
 
     class ArgParserBuilder{
     
+    friend class ArgParser;
     public:
-        ArgParserBuilder& addFlag(Flag flag);
-        ArgParserBuilder& addArgs(int argc, char const *argv[]);
+        ArgParserBuilder& withFlag(Flag flag);
+        ArgParserBuilder& withArgs(int argc, char const *argv[]);
         ArgParserBuilder& withoutTerminateOnFailure();
         ArgParser build();
 
@@ -103,7 +112,16 @@ namespace fluentArgs{
         vector<Flag> flags_;
         vector<Argument> arguments_;
         bool terminateOnFailure_ = true;
+        ArgParserBuilder() = default;
     };
 
+
+    static FlagBuilder createFlag(){
+        return Flag::create();
+    }
+
+    static ArgParserBuilder createArgParser(){
+        return ArgParser::create();
+    }
 
 }

@@ -1,4 +1,5 @@
 #include "ArgParser.hpp"
+
 using namespace fluentArgs;
 using namespace std;
 
@@ -28,6 +29,11 @@ string fluentArgs::Flag::getDescription()
     return this->description_;
 }
 
+FlagBuilder fluentArgs::Flag::create()
+{
+    return FlagBuilder();
+}
+
 // void fluentArgs::Flag::executeOperation()
 // {
 //     this->operation_();
@@ -38,25 +44,25 @@ void fluentArgs::Flag::executeOperation(std::vector<string> subParam)
 }
 
 // FlagBuilder implementation
-FlagBuilder &fluentArgs::FlagBuilder::setName(const string name)
+FlagBuilder &fluentArgs::FlagBuilder::withName(const string name)
 {
     name_ = name;
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setAlias(const string alias)
+FlagBuilder &fluentArgs::FlagBuilder::withAlias(const string alias)
 {
     alias_ = alias;
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setOperation(function<void(std::vector<string>)> operation)
+FlagBuilder &fluentArgs::FlagBuilder::withOperation(function<void(std::vector<string>)> operation)
 {
     operation_ = operation;
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::setNumValues(int numValues)
+FlagBuilder &fluentArgs::FlagBuilder::withNumberOfValues(int numValues)
 {
     numValues_ = numValues;
     return *this;
@@ -106,13 +112,13 @@ Flag fluentArgs::FlagBuilder::build()
 
 //argParserBuilder implementation
 
-ArgParserBuilder &fluentArgs::ArgParserBuilder::addFlag(Flag arg)
+ArgParserBuilder &fluentArgs::ArgParserBuilder::withFlag(Flag arg)
 {
     this->flags_.push_back(arg);
     return *this;
 }
 
-ArgParserBuilder &fluentArgs::ArgParserBuilder::addArgs(int argc, char const *argv[])
+ArgParserBuilder &fluentArgs::ArgParserBuilder::withArgs(int argc, char const *argv[])
 {
     
     for(int i = 1; i< argc; i++){
@@ -168,7 +174,7 @@ void fluentArgs::ArgParser::checkArguments()
                         for(int i = 0; i < itFlag->getNumValues(); i++){
                             if(i > arguments_.size() || itFlag->getNumValues() > arguments_.size()) return;
                     
-                            itArg++; //bug: se metto un comando che riceverebbe un valore ed è l'ultimo va in fault
+                            itArg++;
                             subArg.emplace_back(itArg->getArg());
                         }
                     }
@@ -202,40 +208,10 @@ string fluentArgs::ArgParser::resume()
     return resumeStr;
 }
 
-// bool fluentArgs::ArgParser::compare(Flag flag)
-// {
-//     std::vector<string> subParam;
-
-//     for(std::vector<Argument>::iterator it = this->arguments_.begin(); it != this->arguments_.end(); ++it){
-        
-//         bool check = (flag.getAlias() != ""); //c'è alias?
-//         //se c'è alias --> controlla nome ed alias SENNO' solo nome
-//         check = (check ? flag.getName() == it->getArg() || flag.getAlias() == it->getArg() : flag.getName() == it->getArg());
-        
-//         //(flag.getName() == it->getArg()) || ( check && flag.getAlias() == it->getArg())
-//         if(check){
-//             int pos = 0;
-//             for(int i = 0; i< flag.getNumValues(); i++){
-//                 if(flag.getDelim() == " "){
-//                     if(i > arguments_.size() || flag.getNumValues() > arguments_.size()) return false;
-//                     it++;
-//                     subParam.emplace_back(it->getArg());///-<continua qua ? cambiamo da string a Argument nel prototipo di funzione?
-//                 }
-//                 else{
-//                     std::string token = it->getArg().substr(pos, it->getArg().find(flag.getDelim()));
-//                     subParam.emplace_back(token);
-//                     pos = token.length()+flag.getDelim().length();
-//                     if(pos > it->getArg().length()) // se sono passati meno parametri...?
-//                         return false;
-//                 }
-//             }
-//             flag.executeOperation(subParam);
-//             return true;  //non funziona più 'e' nellesempio
-//         }
-//     }
-
-//     return false;
-// }
+ArgParserBuilder fluentArgs::ArgParser::create()
+{
+    return ArgParserBuilder();
+}
 
 bool fluentArgs::ArgParser::compare(Flag flag, Argument arg)
 {   
