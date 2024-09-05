@@ -34,6 +34,13 @@ FlagBuilder fluentArgs::Flag::create()
     return FlagBuilder();
 }
 
+string fluentArgs::Flag::resume()
+{
+    string str;
+    str.append(this->name_+"\n\talias: "+this->alias_+"\n\tdescription: "+this->description_);
+    return str;
+}
+
 // void fluentArgs::Flag::executeOperation()
 // {
 //     this->operation_();
@@ -128,6 +135,11 @@ ArgParserBuilder &fluentArgs::ArgParserBuilder::withArgs(int argc, char const *a
     return *this;
 }
 
+ArgParserBuilder &fluentArgs::ArgParserBuilder::withArgs(vector<Argument> args)
+{
+    arguments_ = args;
+}
+
 ArgParserBuilder& fluentArgs::ArgParserBuilder::withoutTerminateOnFailure()
 {
     this->terminateOnFailure_ = false;
@@ -151,14 +163,6 @@ ArgParser fluentArgs::ArgParserBuilder::build()
 
 void fluentArgs::ArgParser::checkArguments()
 {
-    // for(std::vector<Flag>::iterator it = this->flags_.begin(); it != this->flags_.end(); ++it){
-    //     // if(compare(*it)) it->executeOperation(); //execute the operation!
-    //     // else if(terminateOnFailure_) return; rompe tutto se non esegue primo flag in ordine cosa errata!
-
-    //     if(compare(*it) && !terminateOnFailure_) return;
-    //     // it += it->getNumValues() -1 ; // mando avanti di numvalues posizioni l'iteratore
-    // }
-
     for(std::vector<Argument>::iterator itArg = this->arguments_.begin(); itArg != this->arguments_.end(); ++itArg){
         for(std::vector<Flag>::iterator itFlag = this->flags_.begin(); itFlag != this->flags_.end(); ++itFlag){
             if(compare(*itFlag,*itArg)){
@@ -190,9 +194,9 @@ void fluentArgs::ArgParser::checkArguments()
                 }
                 
                 itFlag->executeOperation(subArg);
-                // itArg += itFlag->getNumValues(); fa crashare
 
             }
+            // else if(this->terminateOnFailure_) showError(*itFlag); spostare dentro la verifica di compare
             
         }
     }
@@ -202,7 +206,7 @@ string fluentArgs::ArgParser::resume()
 {
     string resumeStr;
     for(Flag flag : flags_){
-        resumeStr.append(flag.getName()+"\talias: "+flag.getAlias()+"\n\tdecription: "+flag.getDescription()+"\n");
+        resumeStr.append(flag.resume()+"\n");
     }
     
     return resumeStr;
@@ -218,6 +222,12 @@ bool fluentArgs::ArgParser::compare(Flag flag, Argument arg)
     bool check = (flag.getAlias() != " ");
     check = (check ? flag.getName() == arg.getArg() || flag.getAlias() == arg.getArg() : flag.getName() == arg.getArg());
     return (check);
+}
+
+void fluentArgs::ArgParser::showError(Flag flag)
+{
+    throw runtime_error(flag.getName()+" generate an error:\n remember:\n"+flag.resume());
+    // cout<<flag.getName()+"generate an error:\n remember:\n"+flag.resume()<<endl;
 }
 
 string fluentArgs::Argument::getArg()

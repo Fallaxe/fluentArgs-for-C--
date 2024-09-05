@@ -68,6 +68,7 @@ namespace fluentArgs{
             int getNumValues();
             string getDelim();
             string getDescription();
+            string resume();
             static FlagBuilder create();
 
         protected:
@@ -93,6 +94,7 @@ namespace fluentArgs{
         ArgParser(vector<Flag> flags,vector<Argument> arguments, bool terminateOnFailure) : flags_(flags),arguments_(arguments),terminateOnFailure_(terminateOnFailure){};
         bool compare(Flag flag);
         bool compare(Flag flag, Argument arg);
+        void showError(Flag flag);
         vector<Flag> flags_;
         vector<Argument> arguments_;
         bool terminateOnFailure_ = true;
@@ -107,6 +109,7 @@ namespace fluentArgs{
         template<typename... Flags>
         ArgParserBuilder& withFlag(Flag flag, Flags...otherFlag);
         ArgParserBuilder& withArgs(int argc, char const *argv[]);
+        ArgParserBuilder& withArgs(vector<Argument> args);
         ArgParserBuilder& withoutTerminateOnFailure();
         ArgParser build();
 
@@ -116,15 +119,6 @@ namespace fluentArgs{
         bool terminateOnFailure_ = true;
         ArgParserBuilder() = default;
     };
-
-
-    static FlagBuilder createFlag(){
-        return Flag::create();
-    }
-
-    static ArgParserBuilder createArgParser(){
-        return ArgParser::create();
-    }
 
     template <typename... Flags>
     inline ArgParserBuilder &ArgParserBuilder::withFlag(Flag flag, Flags... otherFlag)
@@ -137,5 +131,14 @@ namespace fluentArgs{
 
         return *this;
     }
+
+    static FlagBuilder createFlag(){
+        return Flag::create();
+    }
+
+    static ArgParserBuilder createArgParser(){
+        return ArgParser::create();
+    }
+
 
 }
