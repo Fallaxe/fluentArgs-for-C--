@@ -15,6 +15,10 @@ void helloWorld(std::vector<string> vec){
     cout<<"Hello world!"+vec.at(0)<<endl;
 }
 
+void fantasticFun(std::vector<string> vec){
+    cout<<"fantastic: "+vec.at(1)<<endl;
+}
+
 int main(int argc, char const *argv[])
 {
     /*
@@ -25,7 +29,7 @@ int main(int argc, char const *argv[])
         -DONE: modificare operation in una funzione void con parametri a vettore/... string void operation(string.../vectorstring)
         -DONE: cambiare tutti i metodi di Flagbuilder in withSMTG() etc per avere un interfaccia più fluida
         -toglire reset?
-        -togliere delim_? <---si facciamolo!
+        -DONE: delim funziona e indica i parametri divisi da una virgola
         -DONE: withArgs() che prende un vector string(?) ha senso per i sottoparametri che fanno altri flag a sua volta
         -rendere tipizzata la classe flag per aggiungere functional tipizzate meglio
     */
@@ -49,13 +53,19 @@ int main(int argc, char const *argv[])
                                 .withName("e")
                                 .withOperation(exempleFun)
                                 .build();
+    Flag flagWithMultipleArgs = Flag::create()
+                                    .withName("-f")
+                                    .withAlias("--fantastic")
+                                    .withDelim()
+                                    .withOperation(fantasticFun)
+                                    .build();
 
     // cout<<flagWithoutAlias.getAlias()<<endl;
     //i valori non sono per ora passati all operation, il che rende un po inutile la cosa TODO!
     
     ArgParser argparser = ArgParser::create()
                             .withFlag(flag1)
-                            .withFlag(flag2,flagWithoutAlias)
+                            .withFlag(flag2,flagWithoutAlias,flagWithMultipleArgs)
                             .withArgs(argc,argv)
                             .build();
 

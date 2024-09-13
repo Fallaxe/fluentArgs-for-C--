@@ -29,7 +29,7 @@ namespace fluentArgs{
             string alias_ = "";
             int numValues_ = 0;
             function<void(std::vector<string>)> operation_;
-            string delim_ = " ";
+            bool delim_ = false;
             string description_=" ";
             FlagBuilder() = default;
 
@@ -41,7 +41,7 @@ namespace fluentArgs{
             FlagBuilder& withAlias(const string alias);
             FlagBuilder& withOperation(function<void(std::vector<string>)> operation);
             FlagBuilder& withNumberOfValues(int numValues);
-            FlagBuilder& withDelim(const string delim);
+            FlagBuilder& withDelim();
             FlagBuilder& withDescription(const string description);
 
             Flag build();
@@ -56,17 +56,17 @@ namespace fluentArgs{
             string alias_;
             int numValues_;
             function<void(std::vector<string>)> operation_;
-            string delim_;
+            bool delim_;
             string description_;
 
-            Flag(string name, string alias, int numValues, function<void(std::vector<string>)> operation, string delim,string description)
+            Flag(string name, string alias, int numValues, function<void(std::vector<string>)> operation, bool delim,string description)
             :name_(name),alias_(alias),operation_(operation),numValues_(numValues),delim_(delim),description_(description){}; //init
 
         public:
             string getName();
             string getAlias();
             int getNumValues();
-            string getDelim();
+            bool isDelim();
             string getDescription();
             string resume();
             static FlagBuilder create();

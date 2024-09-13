@@ -19,7 +19,7 @@ int fluentArgs::Flag::getNumValues()
     return this->numValues_;
 }
 
-string fluentArgs::Flag::getDelim()
+bool fluentArgs::Flag::isDelim()
 {
     return this->delim_;
 }
@@ -75,9 +75,9 @@ FlagBuilder &fluentArgs::FlagBuilder::withNumberOfValues(int numValues)
     return *this;
 }
 
-FlagBuilder &fluentArgs::FlagBuilder::withDelim(const string delim)
+FlagBuilder &fluentArgs::FlagBuilder::withDelim()
 {
-    delim_ = delim;
+    delim_ = true;
     return *this;
 }
 
@@ -138,6 +138,7 @@ ArgParserBuilder &fluentArgs::ArgParserBuilder::withArgs(int argc, char const *a
 ArgParserBuilder &fluentArgs::ArgParserBuilder::withArgs(vector<Argument> args)
 {
     arguments_ = args;
+    return *this;
 }
 
 ArgParserBuilder& fluentArgs::ArgParserBuilder::withoutTerminateOnFailure()
@@ -160,6 +161,20 @@ ArgParser fluentArgs::ArgParserBuilder::build()
 
 
 //argParser implementation
+std::vector<std::string> splitString(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    size_t start = 0;
+    size_t end = str.find(delimiter);
+
+    while (end != std::string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end = str.find(delimiter, start);
+    }
+
+    tokens.push_back(str.substr(start));  // Aggiungi l'ultimo token
+    return tokens;
+}
 
 void fluentArgs::ArgParser::checkArguments()
 {
@@ -167,14 +182,13 @@ void fluentArgs::ArgParser::checkArguments()
         for(std::vector<Flag>::iterator itFlag = this->flags_.begin(); itFlag != this->flags_.end(); ++itFlag){
             if(compare(*itFlag,*itArg)){
                 vector<string> subArg;
-                int pos =0;
 
                 if(std::distance(arguments_.begin(),itArg) + itFlag->getNumValues() > arguments_.size()-1)
                     return;// posso contenere gli ipotetici argomenti o vado in overflow?
-                    
-                if(itFlag->getNumValues() > 0){ //ci sono argomenti?
-
-                    if(itFlag->getDelim() == " "){ // si e hanno " " come delimitatore
+                
+                if(itFlag->getNumValues() > 0 || itFlag->isDelim()){ //ci sono argomenti?
+                    // itArg++;
+                    if(!itFlag->isDelim()){
                         for(int i = 0; i < itFlag->getNumValues(); i++){
                             if(i > arguments_.size() || itFlag->getNumValues() > arguments_.size()) return;
                     
@@ -182,15 +196,10 @@ void fluentArgs::ArgParser::checkArguments()
                             subArg.emplace_back(itArg->getArg());
                         }
                     }
-                    else{ //si e hanno un delimitatore custom NOT YET IMPLEMENTED
-                            std::string token = itArg->getArg().substr(pos, itArg->getArg().find(itFlag->getDelim()));
-                            subArg.emplace_back(token);
-                            pos = token.length()+itFlag->getDelim().length();
-                            if(pos > itArg->getArg().length()) // se sono passati meno parametri...?
-                                return;
-                            itArg++;
-                        }
-                    
+                    else{ //si e hanno un delimitatore per più comandi
+                        itArg++;
+                        subArg = splitString(itArg->getArg(),',');
+                    }
                 }
                 
                 itFlag->executeOperation(subArg);
