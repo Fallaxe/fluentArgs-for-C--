@@ -21,18 +21,6 @@ void fantasticFun(std::vector<string> vec){
 
 int main(int argc, char const *argv[])
 {
-    /*
-        -numValues_ cambia nome(?) e deve rappresentare un intero di quanti parametri ha il flag dopo
-            es: -a 1 2 3
-            (aggiungere delimitatore al flag per i parametri? oppure si usa sempre ' ')
-        -aggiustare nel caso ci siano argomenti nel mezzo che sporcano "./main -hw e poop -a" esegue uguale ma non deve se failetc dice di no
-        -DONE: modificare operation in una funzione void con parametri a vettore/... string void operation(string.../vectorstring)
-        -DONE: cambiare tutti i metodi di Flagbuilder in withSMTG() etc per avere un interfaccia più fluida
-        -toglire reset?
-        -DONE: delim funziona e indica i parametri divisi da una virgola
-        -DONE: withArgs() che prende un vector string(?) ha senso per i sottoparametri che fanno altri flag a sua volta
-        -rendere tipizzata la classe flag per aggiungere functional tipizzate meglio
-    */
 
    
     Flag flag1 = Flag::create()
@@ -42,7 +30,7 @@ int main(int argc, char const *argv[])
                     .withOperation(myFun)
                     .build();
 
-    Flag flag2 = Flag::create()
+    Flag flag2 = fluentArgs::createFlag()
                     .withName("-hw")
                     .withAlias("--helloworld")
                     .withNumberOfValues(2)
